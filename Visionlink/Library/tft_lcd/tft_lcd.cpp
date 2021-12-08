@@ -822,7 +822,7 @@ void TFT_eSPI::pushImage(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t *da
 				*linePtr++ = lsbColor;
 			}
 
-			pushPixels_2bit(lineBuf, dw);
+			pushPixels(lineBuf, dw);
 
 			data += w;
 		}

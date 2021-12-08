@@ -52,7 +52,8 @@ void delay_ms(uint16_t xms);
 void HSI_ClockSet(void);
 void pinMode(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIOMode_TypeDef Mode);
 void pinSet(GPIO_TypeDef* GPIOx, uint16_t GPIO_pin, uint8_t BitVal);
-	uint8_t pinRead(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
+uint8_t pinRead(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
+	
 void Led_Init(void);
 void Led_toggle(void);
 	
@@ -115,7 +116,7 @@ private:
 
 	
 #ifdef __cplusplus
-}	/*extern "C"*/
+}	/* extern "C" */
 #endif
 
 #endif /* __MY_LIB_H */

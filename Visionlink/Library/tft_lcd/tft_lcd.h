@@ -221,7 +221,7 @@ const PROGMEM fontinfo fontdata[] = {
 #define TFT_SKYBLUE     0x867D      /* 135, 206, 235 */
 #define TFT_VIOLET      0x915C      /* 180,  46, 226 */
 #define RGB565(r, g, b)       (((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3))
-
+#define RGB555(r, g, b)		  (((r & 0xF8) << 7) | ((g & 0xF8) << 2) | ((b & 0xF8) >> 3))
 	
 
 /* TFT_eSPI register init parameter list */

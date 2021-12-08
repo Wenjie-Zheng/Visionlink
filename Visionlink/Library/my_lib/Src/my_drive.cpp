@@ -13,37 +13,42 @@ usart_it_t usart3_it;
 
 /* Private functions ---------------------------------------------------------*/
 #ifdef __cplusplus
-int fputc(int ch, FILE* stream)
+extern "C"
 {
-	while ((USART1->SR & USART_FLAG_TC) == RESET) {}
-	; 
-	USART1->DR = (uint8_t) ch;      
-	return ch;
-}
-#else
-#pragma import(__use_no_semihosting)             
-//标准库需要的支持函数                 
-struct __FILE 
-{
-	int handle; 
-}; 
-
-FILE __stdout;       
-//定义_sys_exit()以避免使用半主机模式    
-void _sys_exit(int x) 
-{ 
-	x = x; 
-} 
-//重定义fputc函数 
-int fputc(int ch, FILE *f)
-{      
-	while ((USART1->SR & USART_FLAG_TC) == RESET) {}
-	;//循环发送,直到发送完毕   
-	USART1->DR = (uint8_t) ch;      
-	return ch;
-}
 #endif
+	
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+PUTCHAR_PROTOTYPE
+{
+	while ((USART1->SR & USART_FLAG_TC) == 0) ;
+	USART1->DR = (uint8_t)ch;
+	return ch;
+}
+int _write(int file, char *ptr, int len)
+{
+	for (int DataIdx = 0; DataIdx < len; DataIdx++)
+	{
+		__io_putchar(*ptr++);
+	}
 
+	return len;
+}
+  
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+PUTCHAR_PROTOTYPE
+{
+	while ((USART1->SR & USART_FLAG_TC) == 0) ;
+	USART1->DR = (uint8_t)ch;
+	return ch;
+}
+#endif	
+	
+#ifdef __cplusplus
+}	/* extern "C"{ */
+#endif
+	
 
 void delay_init(void)
 {
@@ -165,7 +170,7 @@ void Led_Init(void)
 	pinMode(GPIOB, GPIO_Pin_6, GPIO_Mode_Out_PP);
 	pinMode(GPIOB, GPIO_Pin_7, GPIO_Mode_Out_PP);
 	pinMode(GPIOB, GPIO_Pin_8, GPIO_Mode_Out_PP);
-	//GPIOB->ODR &= ~GPIO_Pin_6;
+	GPIOB->ODR &= ~GPIO_Pin_6;
 	GPIOB->ODR &= ~GPIO_Pin_7;
 	GPIOB->ODR &= ~GPIO_Pin_8;
 }
@@ -174,14 +179,14 @@ void Led_toggle(void)
 	static uint8_t index = 0;
 	index ^= 0x01;
 	if (index) {
-		//GPIOB->ODR &= ~GPIO_Pin_6;
+		GPIOB->ODR &= ~GPIO_Pin_6;
 		GPIOB->ODR &= ~GPIO_Pin_7;
 		GPIOB->ODR &= ~GPIO_Pin_8;
 	}
 	else {
-		//GPIOB->ODR |= GPIO_Pin_6;
+		GPIOB->ODR |= GPIO_Pin_6;
 		GPIOB->ODR |= GPIO_Pin_7;
-		GPIOB->ODR = GPIO_Pin_8;
+		GPIOB->ODR |= GPIO_Pin_8;
 	}
 }
 
@@ -399,8 +404,7 @@ void USART_lib::dma_init(uint16_t USART_DMAReq, uint8_t *buff, uint16_t buf_size
 
 void USART_lib::send_byte(uint8_t data)
 {
-	while ((this->USART->SR & USART_FLAG_TXE) == 0) {}
-	;
+	while ((this->USART->SR & USART_FLAG_TC) == 0) {};
 	this->USART->DR = data;
 }
 
@@ -409,8 +413,7 @@ void USART_lib::send_data(const uint8_t* send_buff, uint16_t size)
 	const uint8_t *p = send_buff;
 	while (size--)
 	{
-		while ((this->USART->SR & USART_FLAG_TXE) == 0) {}
-		;
+		while ((this->USART->SR & USART_FLAG_TC) == 0) {};
 		this->USART->DR = *(p++);
 	}
 }
